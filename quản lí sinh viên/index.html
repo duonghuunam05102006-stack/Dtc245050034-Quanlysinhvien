@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Đào Tạo & Quản Lý Sinh Viên - Đại học Bách Khoa Hà Nội (HUST)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        hust: {
+                            50: '#fef2f2',
+                            100: '#fee2e2',
+                            200: '#fecaca',
+                            300: '#fca5a5',
+                            400: '#f87171',
+                            500: '#ef4444',
+                            600: '#dc2626',
+                            700: '#b91c1c',
+                            800: '#991b1b',
+                            900: '#7f1d1d',
+                            navy: '#0f172a',
+                            dark: '#111827'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-[#f8fafc] text-slate-800 antialiased selection:bg-red-700 selection:text-white">
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- ============================================================== -->
+    <!-- VIEW 1: AUTHENTICATION SCREEN (HUST PORTAL)                    -->
+    <!-- ============================================================== -->
+    <div id="auth-view" class="min-h-screen relative overflow-hidden flex flex-col justify-between" style="display: none;">
+        <!-- Campus Backdrop with HUST Theme Overlay -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=2000&q=80" 
+                 alt="HUST Campus" 
+                 class="w-full h-full object-cover object-center filter brightness-[0.32] saturate-[1.25] transform scale-105 transition-transform duration-1000">
+            <div class="absolute inset-0 bg-gradient-to-tr from-[#111827]/95 via-[#1e1b2e]/90 to-[#7f1d1d]/80 backdrop-blur-[2px]"></div>
+            
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-3xl pointer-events-none animate-pulse"></div>
+            <div class="absolute bottom-10 left-1/3 w-80 h-80 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        </div>
+
+        <!-- Top Header Navigation -->
+        <header class="relative z-10 w-full px-6 lg:px-12 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-3.5">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-red-700 via-red-600 to-amber-500 p-0.5 shadow-lg shadow-red-900/40 flex items-center justify-center">
+                    <div class="w-full h-full bg-[#111827] rounded-[14px] flex items-center justify-center">
+                        <svg class="w-7 h-7 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="text-white">
+                    <div class="font-extrabold text-xl tracking-tight flex items-center gap-2">
+                        HUST
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-700/60 text-amber-300 border border-red-500/40">BÁCH KHOA HÀ NỘI</span>
+                    </div>
+                    <div class="text-xs text-slate-300 font-medium">Hanoi University of Science and Technology &bull; Cổng Đào Tạo & Khảo Thí</div>
+                </div>
+            </div>
+
+            <!-- Quick Slogan & Direct Dashboard Access -->
+            <div class="flex items-center gap-4 sm:gap-6">
+                <div class="hidden md:flex items-center gap-5 text-xs text-amber-200/90 font-semibold tracking-wide uppercase">
+                    <span>Trí tuệ</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    <span>Tiên phong</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    <span>Sáng tạo</span>
+                </div>
+                <button type="button" onclick="quickFillLogin('admin')" 
+                        class="px-3.5 py-1.5 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs font-semibold backdrop-blur-md border border-red-500/40 flex items-center gap-2 shadow-lg shadow-red-900/30 transition transform active:scale-95">
+                    <span>Vào Quản Trị</span>
+                    <svg class="w-3.5 h-3.5 text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Body: Two Columns Layout -->
+        <main class="relative z-10 max-w-7xl mx-auto w-full px-6 lg:px-12 py-6 flex-1 flex items-center">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center w-full">
+                
+                <!-- Left Column: Branding -->
+                <div class="lg:col-span-7 text-white space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold text-amber-300 shadow-inner">
+                        <span class="flex h-2 w-2 rounded-full bg-red-500 animate-ping"></span>
+                        Cổng Đào Tạo Trực Tuyến HUST SIS 2026
+                    </div>
+
+                    <div class="space-y-3">
+                        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
+                            Hệ Thống Đào Tạo & <br>
+                            <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-amber-200 to-white drop-shadow">
+                                Quản Lý Sinh Viên Bách Khoa
+                            </span>
+                        </h1>
+                    </div>
+
+                    <!-- 3 Feature Cards -->
+                    <div class="space-y-3 max-w-lg pt-2">
+                        <div class="flex items-center gap-4 p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-red-600 to-amber-500 flex items-center justify-center flex-shrink-0 text-white font-bold">
+                                📚
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-sm text-white">Đăng ký tín chỉ & Thời khóa biểu tự động</h4>
+                                <p class="text-xs text-slate-300">Tự động phát hiện trùng lịch học, tính học phí và đồng bộ ca thi.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-yellow-400 flex items-center justify-center flex-shrink-0 text-slate-900 font-bold">
+                                🏆
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-sm text-white">Hội đồng Học bổng & Giám sát Học vụ</h4>
+                                <p class="text-xs text-slate-300">Tự động xét học bổng Loại A, B và phát hiện sinh viên cảnh báo học vụ.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 p-3 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center flex-shrink-0 text-white font-bold">
+                                💳
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-sm text-white">Thẻ sinh viên E-ID & Dịch vụ Một cửa</h4>
+                                <p class="text-xs text-slate-300">Quét mã VietQR nộp học phí và đăng ký cấp giấy tờ trực tuyến.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex items-center gap-4">
+                        <span class="text-2xl sm:text-3xl text-amber-300 font-['Dancing_Script'] tracking-wide">
+                            Một tình yêu, một tương lai - Bách Khoa Hà Nội!
+                        </span>
+                        <div class="h-[1px] flex-1 bg-gradient-to-r from-amber-400/40 to-transparent"></div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Glass Card With Compact Triggers (Nhỏ lại, ấn mới hiện ra) -->
+                <div class="lg:col-span-5 flex justify-center lg:justify-end">
+                    <div class="w-full max-w-md relative">
+                        
+                        <!-- Floating Crest Badge -->
+                        <div class="absolute -top-7 left-1/2 transform -translate-x-1/2 z-20">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-red-700 via-red-600 to-amber-500 p-1 shadow-xl shadow-red-900/50 flex items-center justify-center">
+                                <div class="w-full h-full bg-white rounded-xl flex items-center justify-center">
+                                    <svg class="w-7 h-7 text-red-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Glass Card Container -->
+                        <div class="glass-card-login p-8 pt-11 relative overflow-hidden text-center">
+                            
+                            <h2 class="text-2xl font-extrabold text-slate-900">Cổng Thông Tin HUST</h2>
+                            <p class="text-xs text-slate-500 mt-1" id="auth-subtext-guide">Nhấn vào tác vụ bên dưới để mở form thao tác</p>
+
+                            <!-- NÚT ĐN VÀ ĐK NHỎ LẠI: ẤN MỚI TRƯỢT HIỆN FORM -->
+                            <div class="mt-5 flex items-center justify-center gap-3">
+                                <button type="button" id="btn-trigger-login" onclick="toggleAuthForm('login')"
+                                        class="auth-trigger-btn">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                                    <span>Đăng nhập</span>
+                                    <span class="text-[10px] opacity-70 ml-0.5" id="arrow-login">▾</span>
+                                </button>
+                                
+                                <button type="button" id="btn-trigger-register" onclick="toggleAuthForm('register')"
+                                        class="auth-trigger-btn">
+                                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                                    <span>Đăng ký</span>
+                                    <span class="text-[10px] opacity-70 ml-0.5" id="arrow-register">▾</span>
+                                </button>
+                            </div>
+
+                            <!-- EXPANDABLE FORM CONTAINER (Trượt mở ra khi ấn) -->
+                            <div id="auth-expandable-box" class="form-reveal-wrapper text-left">
+                                
+                                <!-- FORM 1: LOGIN -->
+                                <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-3.5">
+                                    <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                        <span class="text-xs font-bold text-red-700">Nhập thông tin HUST ID:</span>
+                                        <button type="button" onclick="collapseAuthForm()" class="text-[11px] text-slate-400 hover:text-slate-600">Thu gọn ✕</button>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Mã sinh viên / Tài khoản</label>
+                                        <input type="text" id="login-username" required placeholder="Nhập mã sinh viên hoặc tài khoản..."
+                                               class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-600">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Mật khẩu</label>
+                                        <div class="relative">
+                                            <input type="password" id="login-password" required placeholder="Nhập mật khẩu..."
+                                                   class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-red-600 pr-9">
+                                            <button type="button" onclick="togglePasswordVisibility('login-password', this)" 
+                                                    class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400">
+                                                👁️
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between text-[11px]">
+                                        <label class="flex items-center gap-1.5 text-slate-600 cursor-pointer">
+                                            <input type="checkbox" id="remember-me" class="rounded text-red-600">
+                                            <span>Ghi nhớ</span>
+                                        </label>
+                                        <a href="#" onclick="openForgotPasswordModal(event)" class="text-red-700 font-semibold hover:underline">Quên mật khẩu?</a>
+                                    </div>
+                                    <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-700 to-amber-700 text-white font-bold text-xs shadow-md hover:opacity-95 transition">
+                                        Đăng nhập vào hệ thống &rarr;
+                                    </button>
+                                    <div class="text-center text-xs text-slate-500 pt-1 border-t border-slate-100">
+                                        Chưa có tài khoản? <a href="javascript:void(0)" onclick="toggleAuthForm('register')" class="text-red-700 font-bold hover:underline">Đăng ký tài khoản ngay &rarr;</a>
+                                    </div>
+                                </form>
+
+                                <!-- FORM 2: REGISTER -->
+                                <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="space-y-3 hidden">
+                                    <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                                        <span class="text-xs font-bold text-amber-700">Đăng ký mã sinh viên K68:</span>
+                                        <button type="button" onclick="collapseAuthForm()" class="text-[11px] text-slate-400 hover:text-slate-600">Thu gọn ✕</button>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Họ và tên</label>
+                                        <input type="text" id="reg-fullname" required placeholder="Ví dụ: Nguyễn Văn An"
+                                               class="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 mb-1">Mã SV</label>
+                                            <input type="text" id="reg-username" required placeholder="2023xxxx"
+                                                   class="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-semibold text-slate-700 mb-1">Ngành</label>
+                                            <select id="reg-major" class="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                                                <option>KHMT (IT1)</option>
+                                                <option>KTPM (IT2)</option>
+                                                <option>HTTT (IT-E6)</option>
+                                                <option>AI (IT-E10)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Email SIS trường cấp</label>
+                                        <input type="email" id="reg-email" required placeholder="name@sis.hust.edu.vn"
+                                               class="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-700 mb-1">Mật khẩu</label>
+                                        <input type="password" id="reg-password" required placeholder="Tối thiểu 6 ký tự..."
+                                               class="w-full px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                                    </div>
+                                    <button type="submit" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-700 to-amber-600 text-white font-bold text-xs shadow-md hover:opacity-95 transition">
+                                        Hoàn tất đăng ký & Vào hệ thống &rarr;
+                                    </button>
+                                    <div class="text-center text-xs text-slate-500 pt-1 border-t border-slate-100">
+                                        Đã có tài khoản HUST? <a href="javascript:void(0)" onclick="toggleAuthForm('login')" class="text-red-700 font-bold hover:underline">Chuyển sang Đăng nhập &rarr;</a>
+                                    </div>
+                                </form>
+
+                            </div>
+
+                            <!-- Quick 1-Click Role Access Buttons -->
+                            <div class="pt-5 border-t border-slate-100 mt-5">
+                                <span class="text-[11px] text-slate-400 block mb-2 font-medium">Khám phá nhanh quyền trải nghiệm:</span>
+                                <div class="flex items-center justify-center gap-2">
+                                    <button type="button" onclick="quickFillLogin('admin')" 
+                                            class="px-3 py-1.5 text-[11px] rounded-xl bg-red-50 text-red-700 font-bold border border-red-200 hover:bg-red-100 transition shadow-sm">
+                                        👑 Admin Quản Trị
+                                    </button>
+                                    <button type="button" onclick="quickFillLogin('student')" 
+                                            class="px-3 py-1.5 text-[11px] rounded-xl bg-blue-50 text-blue-700 font-bold border border-blue-200 hover:bg-blue-100 transition shadow-sm">
+                                        🎓 Cổng Sinh Viên
+                                    </button>
+                                    <button type="button" onclick="quickFillLogin('teacher')" 
+                                            class="px-3 py-1.5 text-[11px] rounded-xl bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 hover:bg-emerald-100 transition shadow-sm">
+                                        👨‍🏫 Giảng Viên
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <footer class="relative z-10 w-full px-6 py-4 text-center text-xs text-slate-400 border-t border-white/10">
+            &copy; 2026 Đại học Bách Khoa Hà Nội (HUST). Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội.
+        </footer>
+    </div>
+
+
+    <!-- ============================================================== -->
+    <!-- VIEW 2: MAIN DASHBOARD VIEW (ADMIN & STUDENT PORTAL)           -->
+    <!-- ============================================================== -->
+    <div id="dashboard-view" class="min-h-screen flex flex-col lg:flex-row">
+        
+        <!-- SIDEBAR -->
+        <aside id="sidebar" class="sidebar-hust-bg w-full lg:w-72 flex-shrink-0 flex flex-col justify-between text-white p-5 lg:min-h-screen transition-all z-30">
+            <div>
+                <div class="flex items-center justify-between pb-6 border-b border-white/10 mb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-red-600 via-red-700 to-amber-500 p-0.5 shadow-lg flex items-center justify-center">
+                            <div class="w-full h-full bg-[#111827] rounded-[14px] flex items-center justify-center">
+                                <svg class="w-6 h-6 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="font-extrabold text-lg tracking-tight text-white flex items-center gap-1.5">
+                                HUST
+                                <span class="text-[10px] bg-red-700/50 text-amber-300 px-1.5 py-0.5 rounded border border-red-500/40 font-bold" id="sidebar-role-tag">ADMIN</span>
+                            </div>
+                            <div class="text-[11px] text-slate-300 leading-tight">Đại học Bách Khoa Hà Nội</div>
+                        </div>
+                    </div>
+
+                    <button class="lg:hidden p-2 text-white/70 hover:text-white" onclick="toggleMobileSidebar()">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <!-- Navigation Links for Admin vs Student (Rendered dynamically) -->
+                <nav class="space-y-1.5 text-sm font-medium" id="sidebar-nav-container">
+                    <!-- Dynamic tabs populated by JS -->
+                </nav>
+            </div>
+
+            <!-- Bottom Slogan -->
+            <div class="pt-6 relative z-10">
+                <div class="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15 flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-xl bg-amber-400/20 text-amber-300 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="text-[12px] font-bold text-white">Bách Khoa Hà Nội</div>
+                        <div class="text-[10px] text-amber-200">Trí tuệ - Tiên phong</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <div class="flex-1 flex flex-col min-w-0 overflow-y-auto">
+            
+            <!-- TOP HEADER BAR -->
+            <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-20 px-6 lg:px-8 py-3.5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-4">
+                
+                <!-- Search bar -->
+                <div class="flex items-center gap-3 flex-1 max-w-lg">
+                    <button class="lg:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100" onclick="toggleMobileSidebar()">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                    
+                    <div class="relative w-full">
+                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                        </div>
+                        <input type="text" id="global-search" oninput="handleGlobalSearch(this.value)"
+                               placeholder="Tìm kiếm sinh viên, môn học, lớp học HUST... (Ctrl + K)" 
+                               class="w-full pl-10 pr-4 py-2 text-xs bg-slate-100 dark:bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-red-600 text-slate-800 dark:text-white placeholder-slate-400 transition-all">
+                    </div>
+                </div>
+
+                <!-- Right Header Tools -->
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <!-- Switch to Login View Button -->
+                    <button onclick="switchToLoginView()" title="Xem màn hình Đăng nhập"
+                            class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 hover:bg-red-100 border border-red-200 dark:border-red-800 transition">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                        <span>Màn hình Đăng nhập</span>
+                    </button>
+
+                    <!-- Role Switcher: 3 Vai Trò Rõ Ràng (Admin, Giảng viên chủ nhiệm, Học sinh) -->
+                    <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-2xl border border-slate-200 dark:border-slate-700">
+                        <button onclick="switchRoleTo('admin')" id="role-btn-admin" title="Admin Quản trị cả trường"
+                                class="px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900">
+                            <span>👑</span><span class="hidden sm:inline">Admin</span>
+                        </button>
+                        <button onclick="switchRoleTo('teacher')" id="role-btn-teacher" title="Thầy cô chủ nhiệm quản lý lớp mình"
+                                class="px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900">
+                            <span>👨‍🏫</span><span class="hidden sm:inline">Chủ Nhiệm</span>
+                        </button>
+                        <button onclick="switchRoleTo('student')" id="role-btn-student" title="Học sinh xem TKB & Điểm"
+                                class="px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1 text-slate-600 hover:text-slate-900">
+                            <span>🎓</span><span class="hidden sm:inline">Sinh Viên</span>
+                        </button>
+                    </div>
+
+                    <!-- Live Clock (Vietnamese) -->
+                    <div class="hidden xl:flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <svg class="w-4 h-4 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span id="live-clock">Thứ Bảy, 24/10/2026</span>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" title="Chuyển chế độ sáng/tối"
+                            class="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                        <svg id="theme-icon" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                        </svg>
+                    </button>
+
+                    <!-- Notifications Dropdown -->
+                    <div class="relative">
+                        <button onclick="toggleNotifications()" title="Thông báo hệ thống"
+                                class="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 transition">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+                            </svg>
+                            <span id="notif-badge" class="absolute top-1.5 right-1.5 w-4 h-4 bg-red-600 text-white rounded-full text-[10px] font-bold flex items-center justify-center animate-pulse">3</span>
+                        </button>
+
+                        <div id="notif-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 p-3 z-50 animate-fade-in">
+                            <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700">
+                                <h4 class="font-bold text-xs text-slate-800 dark:text-white">Thông báo HUST</h4>
+                                <button onclick="markAllNotificationsRead()" class="text-[11px] text-red-600 hover:underline">Đã đọc tất cả</button>
+                            </div>
+                            <div id="notif-list" class="divide-y divide-slate-100 dark:divide-slate-700/60 max-h-72 overflow-y-auto"></div>
+                        </div>
+                    </div>
+
+                    <!-- User Profile Dropdown -->
+                    <div class="relative">
+                        <button onclick="toggleUserMenu()" class="flex items-center gap-3 p-1 pr-2.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                            <img id="header-user-avatar" 
+                                 src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80" 
+                                 alt="User avatar" 
+                                 class="w-8 h-8 rounded-full object-cover ring-2 ring-red-600">
+                            <div class="text-left hidden sm:block">
+                                <div class="text-xs font-bold text-slate-800 dark:text-white" id="header-user-name">Admin</div>
+                                <div class="text-[10px] text-red-600 dark:text-red-400 font-semibold" id="header-user-role">Quản trị viên</div>
+                            </div>
+                            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 py-1.5 z-50 animate-fade-in">
+                            <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-700 text-xs">
+                                <div class="font-bold text-slate-800 dark:text-white" id="menu-user-fullname">ThS. Trần Quang Minh</div>
+                                <div class="text-slate-400 text-[11px]" id="menu-user-email">minh.tq@hust.edu.vn</div>
+                            </div>
+                            <button onclick="switchToLoginView()" class="w-full text-left px-4 py-2 text-xs text-red-600 hover:bg-red-50 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                                Xem màn hình Đăng nhập
+                            </button>
+                            <button onclick="handleLogout()" class="w-full text-left px-4 py-2 text-xs text-slate-700 dark:text-slate-300 hover:bg-slate-50 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                                Đăng xuất
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </header>
+
+            <!-- MAIN DYNAMIC CONTENT CONTAINER -->
+            <main class="flex-1 p-6 lg:p-8 space-y-7 max-w-7xl w-full mx-auto" id="main-content-zone">
+                <!-- Populated dynamically by app.js: Admin Views vs Student Portal Views -->
+            </main>
+
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- MODALS: ADD, EDIT, VIEW, DELETE, QR PAYMENT, SCHOLARSHIP       -->
+    <!-- ============================================================== -->
+
+    <!-- Modal: Add Student -->
+    <div id="modal-add-student" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-lg p-6 relative">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base text-slate-800 dark:text-white">Thêm sinh viên Bách Khoa mới</h3>
+                        <p class="text-xs text-slate-400">Nhập thông tin hồ sơ đào tạo K68</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-add-student')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <form id="form-add-student" onsubmit="handleAddStudentSubmit(event)" class="mt-4 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mã sinh viên (HUST) *</label>
+                        <input type="text" id="add-id" required placeholder="20230009" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 rounded-xl text-slate-800 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Họ và tên *</label>
+                        <input type="text" id="add-fullname" required placeholder="Nguyễn Văn A" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 rounded-xl text-slate-800 dark:text-white">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Ngành đào tạo *</label>
+                        <select id="add-class" required class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 rounded-xl text-slate-800 dark:text-white">
+                            <option value="KHMT 01 - K68">Khoa học Máy tính (IT1)</option>
+                            <option value="KTPM 02 - K68">Kỹ thuật Phần mềm (IT2)</option>
+                            <option value="HTTT 01 - K68">Hệ thống Thông tin (IT-E6)</option>
+                            <option value="AI 01 - K68">Trí tuệ Nhân tạo & DS (IT-E10)</option>
+                            <option value="DTVT 01 - K68">Điện tử Viễn thông (ET1)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Giới tính</label>
+                        <select id="add-gender" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 rounded-xl text-slate-800 dark:text-white">
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Điểm TB (GPA)</label>
+                        <input type="number" step="0.01" min="0" max="10" id="add-gpa" value="8.5" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 rounded-xl text-slate-800 dark:text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Điểm Rèn Luyện (ĐRL)</label>
+                        <input type="number" min="0" max="100" id="add-drl" value="85" class="w-full px-3 py-2 text-xs bg-slate-50 dark:bg-slate-700 border border-slate-200 rounded-xl text-slate-800 dark:text-white">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('modal-add-student')" class="px-4 py-2 text-xs font-semibold text-slate-600 rounded-xl hover:bg-slate-100">Hủy</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-red-700 hover:bg-red-800 rounded-xl shadow-md">Lưu sinh viên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: View Student Details -->
+    <div id="modal-view-student" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-lg p-6 relative">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-700">
+                <h3 class="font-bold text-base text-slate-800 dark:text-white">Hồ sơ chi tiết sinh viên Bách Khoa</h3>
+                <button onclick="closeModal('modal-view-student')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div id="view-student-body" class="mt-4 space-y-4"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Student -->
+    <div id="modal-edit-student" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-lg p-6 relative">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700">
+                <h3 class="font-bold text-base text-slate-800 dark:text-white">Chỉnh sửa hồ sơ sinh viên</h3>
+                <button onclick="closeModal('modal-edit-student')" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <form id="form-edit-student" onsubmit="handleEditStudentSubmit(event)" class="mt-4 space-y-4">
+                <input type="hidden" id="edit-id">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mã sinh viên</label>
+                        <input type="text" id="edit-studentId" disabled class="w-full px-3 py-2 text-xs bg-slate-100 border border-slate-200 rounded-xl text-slate-400 cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Họ và tên *</label>
+                        <input type="text" id="edit-fullname" required class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Lớp / Ngành</label>
+                        <input type="text" id="edit-class" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Trạng thái</label>
+                        <select id="edit-status" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800">
+                            <option value="Đang học">Đang học</option>
+                            <option value="Tạm nghỉ">Tạm nghỉ</option>
+                            <option value="Bảo lưu">Bảo lưu</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Điểm TB (GPA)</label>
+                        <input type="number" step="0.01" min="0" max="10" id="edit-gpa" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Điểm Rèn Luyện (ĐRL)</label>
+                        <input type="number" min="0" max="100" id="edit-drl" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800">
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-slate-200 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('modal-edit-student')" class="px-4 py-2 text-xs font-semibold text-slate-600 rounded-xl">Hủy</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-red-700 rounded-xl">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Delete Confirmation -->
+    <div id="modal-delete-student" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-sm p-6 text-center">
+            <div class="w-14 h-14 rounded-2xl bg-red-100 text-red-600 mx-auto flex items-center justify-center mb-4">
+                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </div>
+            <h3 class="font-bold text-lg text-slate-800 dark:text-white">Xác nhận xóa sinh viên</h3>
+            <p class="text-xs text-slate-500 mt-1 mb-6">Bạn có chắc muốn xóa <strong id="delete-student-name"></strong>?</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="closeModal('modal-delete-student')" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-600">Hủy</button>
+                <button onclick="confirmDeleteStudent()" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold shadow-md">Xóa vĩnh viễn</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Student QR Tuition Payment -->
+    <div id="modal-qr-payment" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-sm p-6 text-center">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+                <h3 class="font-bold text-sm text-slate-800 dark:text-white">Thanh Toán Học Phí Bách Khoa</h3>
+                <button onclick="closeModal('modal-qr-payment')" class="text-slate-400 p-1">&times;</button>
+            </div>
+            <div class="my-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl flex flex-col items-center">
+                <div class="w-48 h-48 bg-white p-2 rounded-xl shadow-md border border-slate-200 flex items-center justify-center">
+                    <svg class="w-full h-full text-slate-900" viewBox="0 0 100 100" fill="currentColor">
+                        <rect x="5" y="5" width="25" height="25" fill="#111827"/>
+                        <rect x="9" y="9" width="17" height="17" fill="#ffffff"/>
+                        <rect x="13" y="13" width="9" height="9" fill="#b91c1c"/>
+                        <rect x="70" y="5" width="25" height="25" fill="#111827"/>
+                        <rect x="74" y="9" width="17" height="17" fill="#ffffff"/>
+                        <rect x="78" y="13" width="9" height="9" fill="#b91c1c"/>
+                        <rect x="5" y="70" width="25" height="25" fill="#111827"/>
+                        <rect x="9" y="74" width="17" height="17" fill="#ffffff"/>
+                        <rect x="13" y="78" width="9" height="9" fill="#b91c1c"/>
+                        <rect x="35" y="10" width="10" height="10" fill="#111827"/>
+                        <rect x="50" y="20" width="15" height="8" fill="#111827"/>
+                        <rect x="35" y="35" width="30" height="30" fill="#b91c1c"/>
+                        <rect x="42" y="42" width="16" height="16" fill="#ffffff"/>
+                        <rect x="46" y="46" width="8" height="8" fill="#111827"/>
+                        <rect x="70" y="40" width="20" height="10" fill="#111827"/>
+                        <rect x="75" y="60" width="15" height="20" fill="#111827"/>
+                        <rect x="40" y="75" width="20" height="15" fill="#111827"/>
+                    </svg>
+                </div>
+                <div class="mt-3 text-xs font-bold text-red-600">VietQR Napas247 &bull; HUST SIS</div>
+                <div class="text-[11px] text-slate-500 mt-1">Nội dung: <strong>HUST 20230001 HOCPHI HK1</strong></div>
+                <div class="text-sm font-extrabold text-slate-800 dark:text-white mt-1">Số tiền: 18,500,000 VNĐ</div>
+            </div>
+            <button onclick="confirmSimulatedPayment()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md">
+                Xác nhận đã thanh toán
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal: Request Student Document (Dịch vụ Một Cửa) -->
+    <div id="modal-service-request" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-md p-6">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                <h3 class="font-bold text-sm text-slate-800 dark:text-white">Tạo Yêu Cầu Dịch Vụ Một Cửa</h3>
+                <button onclick="closeModal('modal-service-request')" class="text-slate-400 p-1">&times;</button>
+            </div>
+            <div class="space-y-4 mt-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Loại giấy tờ cần cấp:</label>
+                    <select id="req-service-type" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                        <option>Giấy xác nhận sinh viên (Vay vốn ngân hàng chính sách)</option>
+                        <option>Giấy giới thiệu thực tập doanh nghiệp</option>
+                        <option>Bảng điểm học tập chính thức có dấu đỏ</option>
+                        <option>Đơn xin hoãn thi có lý do chính đáng</option>
+                        <option>Cấp lại thẻ sinh viên HUST bị mất</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Số lượng bản:</label>
+                    <input type="number" min="1" max="5" value="1" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Ghi chú gửi Phòng Đào tạo (nếu có):</label>
+                    <textarea placeholder="Mục đích sử dụng..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl h-20"></textarea>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="closeModal('modal-service-request')" class="flex-1 py-2 text-xs font-semibold text-slate-600 border border-slate-200 rounded-xl">Hủy</button>
+                    <button onclick="submitStudentRequest()" class="flex-1 py-2 text-xs font-bold text-white bg-red-700 rounded-xl">Gửi yêu cầu trực tuyến</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Forgot Password -->
+    <div id="modal-forgot-password" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-md p-6 text-center">
+            <h3 class="font-bold text-lg text-slate-800 dark:text-white">Khôi phục mật khẩu HUST ID</h3>
+            <p class="text-xs text-slate-500 mt-1 mb-5">Nhập mã sinh viên hoặc email @sis.hust.edu.vn để nhận mã OTP.</p>
+            <div class="space-y-4">
+                <input type="text" id="forgot-input" placeholder="Mã SV hoặc email..." class="w-full px-3.5 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl text-center">
+                <div class="flex gap-3">
+                    <button onclick="closeModal('modal-forgot-password')" class="flex-1 py-2 text-xs font-semibold text-slate-600 border border-slate-200 rounded-xl">Hủy</button>
+                    <button onclick="handleForgotSubmit()" class="flex-1 py-2 text-xs font-bold text-white bg-red-700 rounded-xl">Gửi OTP</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Thêm / Sửa Lớp Học (CRUD Lớp) -->
+    <div id="modal-class" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-lg p-6 relative">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                <h3 class="font-bold text-base text-slate-800 dark:text-white" id="modal-class-title">Thêm Lớp Chuyên Ngành Mới</h3>
+                <button onclick="closeModal('modal-class')" class="text-slate-400 hover:text-slate-600 p-1">&times;</button>
+            </div>
+            <form id="form-class" onsubmit="handleSaveClass(event)" class="space-y-4 mt-4">
+                <input type="hidden" id="class-edit-id">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mã Lớp (VD: IT1-02-K68) *</label>
+                        <input type="text" id="class-code" required placeholder="IT1-02-K68" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Sĩ Số Dự Kiến *</label>
+                        <input type="number" id="class-students" min="1" max="500" value="50" required class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Tên Lớp Chuyên Ngành *</label>
+                    <input type="text" id="class-name" required placeholder="Khoa học Máy tính 02 - K68" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Khoa / Viện Trực Thuộc *</label>
+                    <select id="class-faculty" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                        <option value="Trường Công nghệ Thông tin & Truyền thông">Trường Công nghệ Thông tin & Truyền thông (SoICT)</option>
+                        <option value="Trường Điện - Điện tử">Trường Điện - Điện tử (SEEE)</option>
+                        <option value="Trường Cơ khí">Trường Cơ khí (SME)</option>
+                        <option value="Khoa Toán - Tin">Khoa Toán - Tin (SAMI)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Giảng Viên Chủ Nhiệm (Cố vấn)</label>
+                        <select id="class-advisor-select" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Phòng Sinh Hoạt</label>
+                        <input type="text" id="class-room" placeholder="P.402 - Nhà B1" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Lớp Trưởng</label>
+                    <input type="text" id="class-president" placeholder="Họ tên sinh viên lớp trưởng..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                </div>
+                <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('modal-class')" class="px-4 py-2 text-xs font-semibold text-slate-600 rounded-xl hover:bg-slate-100">Hủy</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-red-700 rounded-xl shadow-md">Lưu Lớp Học</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Thêm / Sửa Giảng Viên (CRUD Giảng Viên) -->
+    <div id="modal-teacher" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-lg p-6 relative">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                <h3 class="font-bold text-base text-slate-800 dark:text-white" id="modal-teacher-title">Thêm Giảng Viên Mới</h3>
+                <button onclick="closeModal('modal-teacher')" class="text-slate-400 hover:text-slate-600 p-1">&times;</button>
+            </div>
+            <form id="form-teacher" onsubmit="handleSaveTeacher(event)" class="space-y-4 mt-4">
+                <input type="hidden" id="teacher-edit-id">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Mã Giảng Viên (VD: GV006) *</label>
+                        <input type="text" id="teacher-id" required placeholder="GV006" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Học Hàm / Học Vị</label>
+                        <select id="teacher-degree" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                            <option value="PGS. TS.">Phó Giáo sư, Tiến sĩ (PGS. TS.)</option>
+                            <option value="GS. TS.">Giáo sư, Tiến sĩ (GS. TS.)</option>
+                            <option value="TS.">Tiến sĩ (TS.)</option>
+                            <option value="ThS.">Thạc sĩ (ThS.)</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Họ Và Tên Giảng Viên *</label>
+                    <input type="text" id="teacher-name" required placeholder="Nguyễn Văn A" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Email HUST *</label>
+                        <input type="email" id="teacher-email" required placeholder="name@hust.edu.vn" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Số Điện Thoại</label>
+                        <input type="text" id="teacher-phone" placeholder="0912 345 678" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Khoa / Viện Giảng Dạy</label>
+                    <input type="text" id="teacher-department" value="Trường CNTT & TT" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Phân Công Chủ Nhiệm Lớp</label>
+                    <select id="teacher-homeroom-select" class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                        <option value="">Chưa phân công chủ nhiệm (Chỉ dạy bộ môn)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Môn Phụ Trách Giảng Dạy</label>
+                    <input type="text" id="teacher-courses" placeholder="VD: Lập trình C/C++, Cấu trúc dữ liệu..." class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl">
+                </div>
+                <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('modal-teacher')" class="px-4 py-2 text-xs font-semibold text-slate-600 rounded-xl hover:bg-slate-100">Hủy</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-red-700 rounded-xl shadow-md">Lưu Giảng Viên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Nhập / Sửa Điểm Học Phần Cho Sinh Viên (CRUD Điểm) -->
+    <div id="modal-grade" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-md p-6 relative">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                <div>
+                    <h3 class="font-bold text-base text-slate-800 dark:text-white">Nhập Điểm Học Phần</h3>
+                    <p class="text-xs text-slate-400 mt-0.5" id="grade-modal-subtitle">Sinh viên: ... &bull; Môn: ...</p>
+                </div>
+                <button onclick="closeModal('modal-grade')" class="text-slate-400 hover:text-slate-600 p-1">&times;</button>
+            </div>
+            <form id="form-grade" onsubmit="handleSaveGrade(event)" class="space-y-4 mt-4">
+                <input type="hidden" id="grade-student-id">
+                <input type="hidden" id="grade-subject-name">
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Chuyên cần (10%)</label>
+                        <input type="number" step="0.1" min="0" max="10" id="grade-cc" required oninput="calculateLiveTotalGrade()"
+                               class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Giữa kỳ (30%)</label>
+                        <input type="number" step="0.1" min="0" max="10" id="grade-gk" required oninput="calculateLiveTotalGrade()"
+                               class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-center">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-700 mb-1">Cuối kỳ (60%)</label>
+                        <input type="number" step="0.1" min="0" max="10" id="grade-ck" required oninput="calculateLiveTotalGrade()"
+                               class="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-800 text-center">
+                    </div>
+                </div>
+
+                <!-- Live Result Box -->
+                <div class="p-4 bg-gradient-to-r from-red-50 to-amber-50 rounded-2xl border border-red-200 text-center">
+                    <span class="text-[11px] text-slate-500 font-medium">Tổng kết dự tính:</span>
+                    <div class="flex items-center justify-center gap-4 mt-1">
+                        <div>
+                            <span class="text-2xl font-extrabold text-red-700" id="grade-live-total">0.0</span>
+                            <span class="text-[11px] text-slate-500 font-semibold">/ 10</span>
+                        </div>
+                        <div class="h-6 w-[1px] bg-red-200"></div>
+                        <div>
+                            <span class="px-2.5 py-1 rounded-lg bg-red-700 text-white font-extrabold text-xs" id="grade-live-letter">F</span>
+                        </div>
+                        <div class="h-6 w-[1px] bg-red-200"></div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-700">Hệ 4: <strong id="grade-live-gpa4" class="text-red-700">0.0</strong></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('modal-grade')" class="px-4 py-2 text-xs font-semibold text-slate-600 rounded-xl hover:bg-slate-100">Hủy</button>
+                    <button type="submit" class="px-5 py-2 text-xs font-bold text-white bg-red-700 rounded-xl shadow-md">Lưu Bảng Điểm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: CSDL MySQL / phpMyAdmin Đề 2 -->
+    <div id="modal-db-sql" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="modal-content w-full max-w-xl p-6 relative">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-200">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-xl">🐬</span>
+                    <div>
+                        <h3 class="font-bold text-base text-slate-800 dark:text-white">Cơ Sở Dữ Liệu MySQL / phpMyAdmin</h3>
+                        <p class="text-[11px] text-slate-400">Đề 2: Website Quản lý sinh viên (CRUD SV, Lớp, Điểm số)</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('modal-db-sql')" class="text-slate-400 hover:text-slate-600 p-1">&times;</button>
+            </div>
+            <div class="mt-4 space-y-4 text-xs">
+                <div class="p-3.5 bg-emerald-50 text-emerald-800 rounded-2xl border border-emerald-200 font-medium">
+                    ✅ File <strong>quan_ly_sinh_vien.sql</strong> đã được tạo hoàn chỉnh tại thư mục gốc dự án, sẵn sàng nộp bài hoặc import 1 click vào phpMyAdmin!
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-slate-700 dark:text-slate-300">
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200">
+                        <strong class="text-red-700 block mb-1">📋 8 Bảng dữ liệu chuẩn hóa:</strong>
+                        <ul class="list-disc list-inside space-y-0.5 text-[11px] text-slate-600 dark:text-slate-400">
+                            <li><code>khoa_vien</code>: Danh mục các viện</li>
+                            <li><code>lop_hoc</code>: Lớp chuyên ngành & cố vấn</li>
+                            <li><code>giang_vien</code>: Thầy cô & môn dạy</li>
+                            <li><code>sinh_vien</code>: Hồ sơ SV K68</li>
+                            <li><code>mon_hoc</code>: Tín chỉ & trọng số</li>
+                            <li><code>diem_so</code>: Bảng điểm chi tiết</li>
+                            <li><code>thoi_khoa_bieu</code>: Tiết, hôm, phòng, GV</li>
+                            <li><code>tai_khoan</code>: Phân quyền 3 vai trò</li>
+                        </ul>
+                    </div>
+                    <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200">
+                        <strong class="text-red-700 block mb-1">🚀 3 Bước Import phpMyAdmin:</strong>
+                        <ol class="list-decimal list-inside space-y-1 text-[11px] text-slate-600 dark:text-slate-400">
+                            <li>Mở <strong>XAMPP</strong> & bật Apache + MySQL.</li>
+                            <li>Truy cập <code>http://localhost/phpmyadmin</code>.</li>
+                            <li>Chọn thẻ <strong>Import</strong> &bull; Chọn file <code>quan_ly_sinh_vien.sql</code> &bull; Bấm <strong>Import (Thực hiện)</strong>.</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="pt-3 border-t border-slate-200 flex justify-end gap-3">
+                    <button type="button" onclick="closeModal('modal-db-sql')" class="px-4 py-2 text-xs font-semibold text-slate-600 rounded-xl hover:bg-slate-100">Đóng</button>
+                    <button type="button" onclick="downloadDatabaseSQL()" class="px-5 py-2 text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-md flex items-center gap-1.5">
+                        <span>📥</span> Tải File quan_ly_sinh_vien.sql
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core App Scripts -->
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

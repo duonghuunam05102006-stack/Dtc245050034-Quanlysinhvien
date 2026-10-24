@@ -1,0 +1,13 @@
+# Thư viện và phụ thuộc của Node.js
+node_modules/
+npm-debug.log
+
+# Các biến môi trường và thông tin bảo mật
+.env
+
+# Dữ liệu lưu trữ của Docker MySQL
+mysql_data/
+
+# Các file hệ thống rác
+.DS_Store
+Thumbs.db

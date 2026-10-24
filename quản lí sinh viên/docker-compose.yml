@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # 1. Dịch vụ Cơ sở dữ liệu MySQL
+  db:
+    image: mysql:8.0
+    container_name: hust_mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: quan_ly_sinh_vien
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./quan_ly_sinh_vien.sql:/docker-entrypoint-initdb.d/quan_ly_sinh_vien.sql
+
+  # 2. Dịch vụ phpMyAdmin (Quản lý CSDL trực quan)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: hust_phpmyadmin
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: rootpassword
+    depends_on:
+      - db
+
+  # 3. Dịch vụ Ứng dụng Node.js Backend
+  app:
+    build: .
+    container_name: hust_node_app
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - PORT=3000
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASSWORD=rootpassword
+      - DB_NAME=quan_ly_sinh_vien
+    ports:
+      - "3000:3000"
+
+  # 4. Dịch vụ Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: hust_nginx_proxy
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+
+volumes:
+  mysql_data:
